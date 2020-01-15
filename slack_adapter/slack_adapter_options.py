@@ -5,12 +5,6 @@ from slack_adapter import NewSlackMessage
 
 class SlackAdapterOptions:
     @property
-    def activity_to_slack(activity:Activity):
-        slackVerificationToken = activity.conversation
-        slackBotToken = activity.conversation.id
-        slackClientSinginSecret = activity.conversation.thread_time_stamp
-
-    @property
     def __options(self):
         return self._options
 
@@ -27,4 +21,37 @@ class SlackAdapterOptions:
 
     def __init__(self, options):
         self._slack = slack.web
-        
+
+    @property
+    def slackBotToken(self, fget, fset):
+        return self._slackBotToken
+    def __get__(self, instance, owner):
+        return
+
+    @property
+    def SlackClientId(self, fget, fset):
+        return self._slackCientId
+
+    @property
+    def SlackClientSecret(self, fget, fset):
+        return self._SlackClientSecret
+
+    @property
+    def slackClientSinginSecret(self):
+        return self._slackClientSinginSecret
+
+    @property
+    def activity_to_slack(activity: Activity):
+
+        virtual Task<string> GetBotUserByTeamAsync(string teamId, CancellationToken cancellationToken)
+        {throw new NotImplementedException();
+        public Task<string> GetTokenForTeamAsync(string teamId, CancellationToken cancellationToken)
+        {throw new NotImplementedException();Uri SlackRedirectUri{get;set;}
+        List < string > SlackScopes {get;} = new List < string > ();
+        slackVerificationToken = activity.conversation
+
+
+    @property
+    def SlackClientId(self):
+        return self.
+
