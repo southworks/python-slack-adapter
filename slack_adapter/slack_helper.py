@@ -5,6 +5,7 @@ from slack_adapter import NewSlackMessage
 
 Object = lambda **kwargs: type("Object", (), kwargs)
 
+
 def activity_to_slack(activity: Activity):
     if not activity:
         raise Exception
