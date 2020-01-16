@@ -5,7 +5,7 @@ from botframework.connector.models import ActivityTypes, ConversationAccount
 from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
 from slack_adapter import NewSlackMessage, slack_helper
-
+from logging import Logger
 
 class SlackAdapter:
     @property
@@ -32,11 +32,16 @@ class SlackAdapter:
     def slack_client(self):
         return self._slack_client
 
+    @property
+    def logger(self):
+        return self._logger
+
     # def __init__(self, options):
     #     self._slack = slack.web
 
-    def __init__(self, slack_client: SlackClientWrapper):
+    def __init__(self, slack_client: SlackClientWrapper, logger: Logger):
         self._slack_client = slack_client if slack_client else ValueError(type(slack_client))
+        self._logger = logger
 
     @staticmethod
     def activity_to_slack(activity:Activity):
@@ -67,7 +72,7 @@ class SlackAdapter:
 
         for activity in activities:
             if type(activity) != ActivityTypes.Message:
-                ValueError("Unsupported Activity Type. Only Activities of type ‘Message’ are supported.", type(activities))
+                self._logger.propagate(f'Unsupported Activity Type: {activity.type}. Only Activities of type ‘Message’ are supported.')
 
         message = slack_helper.activity_to_slack(activity)
 
