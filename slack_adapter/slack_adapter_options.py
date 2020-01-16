@@ -1,9 +1,11 @@
-import slack
-from botbuilder.schema import Activity
-
-from slack_adapter import NewSlackMessage
-
 class SlackAdapterOptions:
+
+    def get_bot_user_by_team(self, team_id, cancellation_token):
+        raise NotImplementedError
+
+    def get_token_for_team(self, team_id, cancellation_token):
+        raise NotImplementedError
+
     @property
     def __options(self):
         return self._options
@@ -15,43 +17,68 @@ class SlackAdapterOptions:
     @property
     def name(self):
         return 'Slack Adapter Options'
+
     @property
     def middlewares(self):
         return self._middlewares
 
-    def __init__(self, options):
-        self._slack = slack.web
+    @property
+    def slack_bot_token(self):
+        return self._slack_bot_token
+
+    @slack_bot_token.setter
+    def slack_bot_token(self, slack_bot_token):
+        self._slack_bot_token = slack_bot_token
 
     @property
-    def slackBotToken(self, fget, fset):
-        return self._slackBotToken
-    def __get__(self, instance, owner):
-        return
+    def slack_client_id(self):
+        return self._slack_client_id
+
+    @slack_client_id.setter
+    def slack_client_id(self, slack_client_id):
+        self._slack_client_id = slack_client_id
 
     @property
-    def SlackClientId(self, fget, fset):
-        return self._slackCientId
+    def slack_client_secret(self):
+        return self._slack_client_secret
+
+    @slack_client_secret.setter
+    def slack_client_secret(self, slack_client_secret):
+        self._slack_client_secret = slack_client_secret
 
     @property
-    def SlackClientSecret(self, fget, fset):
-        return self._SlackClientSecret
+    def slack_client_sign_in_secret(self):
+        return self._slack_client_sign_in_secret
+
+    @slack_client_sign_in_secret.setter
+    def slack_client_sign_in_secret(self, slack_client_sign_in_secret):
+        self._slack_client_sign_in_secret = slack_client_sign_in_secret
 
     @property
-    def slackClientSinginSecret(self):
-        return self._slackClientSinginSecret
+    def slack_redirect_uri(self):
+        return self._slack_redirect_uri
+
+    @slack_redirect_uri.setter
+    def slack_redirect_uri(self, slack_redirect_uri):
+        self._slack_redirect_uri = slack_redirect_uri
 
     @property
-    def activity_to_slack(activity: Activity):
+    def slack_verification_token(self):
+        return self._slack_verification_token
 
-        virtual Task<string> GetBotUserByTeamAsync(string teamId, CancellationToken cancellationToken)
-        {throw new NotImplementedException();
-        public Task<string> GetTokenForTeamAsync(string teamId, CancellationToken cancellationToken)
-        {throw new NotImplementedException();Uri SlackRedirectUri{get;set;}
-        List < string > SlackScopes {get;} = new List < string > ();
-        slackVerificationToken = activity.conversation
-
+    @slack_verification_token.setter
+    def slack_verification_token(self, slack_verification_token):
+        self._slack_verification_token = slack_verification_token
 
     @property
-    def SlackClientId(self):
-        return self.
+    def slack_scopes(self):
+        return self._slack_scopes
 
+    def __init__(self, slack_bot_token=None, slack_client_id=None, slack_client_secret=None,
+                 slack_client_sign_in_secret=None, slack_redirect_uri=None, slack_verification_token=None):
+        self._slack_bot_token = slack_bot_token
+        self._slack_client_id = slack_client_id
+        self._slack_client_secret = slack_client_secret
+        self._slack_client_sign_in_secret = slack_client_sign_in_secret
+        self.slack_redirect_uri = slack_redirect_uri
+        self._slack_verification_token = slack_verification_token
