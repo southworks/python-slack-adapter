@@ -29,7 +29,7 @@ class SlackAdapter:
         return self._middlewares
 
     @property
-    def slack_client(self):
+    def slack_client(self) -> SlackClientWrapper:
         return self._slack_client
 
     @property
@@ -59,9 +59,9 @@ class SlackAdapter:
 
         return message
 
-    def continue_conversation(self, reference: ConversationReference):
+    #def continue_conversation(self, reference: ConversationReference):
 
-    async def send_activities(self, turn_context: TurnContext, activities: list[Activity]):
+    async def send_activities(self, turn_context: TurnContext, activities: list[Activity], cancellation_token):
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -76,21 +76,19 @@ class SlackAdapter:
 
         message = slack_helper.activity_to_slack(activity)
 
-        # ToDo
-        slack_response = await _slackClient.PostMessageAsync(message, cancellationToken).ConfigureAwait(false)
+        slack_response = await self._slack_client.post_message(message, cancellation_token)
 
-        if slack_response is None and slack_response.Ok:
+        if slack_response is None and slack_response.ok:
             resource_response = ActivityResourceResponse()
+            resource_response.id = slack_response.time_stamp
+            resource_response.activity_id = slack_response.time_stamp
 
-        id = slack_response.Ts
-        activity_id = slack_response.Ts
-        conversation = ConversationAccount()
+            conversation = ConversationAccount()
+            conversation.conversation_id = slack_response.channel,
 
-        id = slack_response.Channel,
+            responses.append(resource_response)
 
-        responses.append(resource_response)
-
-        return responses.ToArray()
+        return responses
 
     def update_activity(self, turn_context: TurnContext, activity: Activity):
 
