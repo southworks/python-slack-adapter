@@ -5,7 +5,7 @@ from botframework.connector.models import ActivityTypes, ConversationAccount
 from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
 from .slack_helper import SlackHelper
-from slack_adapter import NewSlackMessage
+from slack_adapter import NewSlackMessage, slack_helper
 from logging import Logger
 
 class SlackAdapter:
@@ -60,7 +60,8 @@ class SlackAdapter:
 
         return message
 
-    #def continue_conversation(self, reference: ConversationReference):
+    def continue_conversation(self, reference: ConversationReference):
+        pass
 
     async def send_activities(self, turn_context: TurnContext, activities: list[Activity], cancellation_token):
         if turn_context is None:
@@ -91,7 +92,6 @@ class SlackAdapter:
 
         return responses
 
-
     async def update_activity(self, turn_context: TurnContext, activity: Activity, cancellation_token):
         if turn_context is None:
             ValueError(type(turn_context))
@@ -108,6 +108,29 @@ class SlackAdapter:
         if activity.conversation is None:
             ValueError(type(activity.channel_id))
 
-        message = Sla
+        message = SlackHelper.activity_to_slack();
 
-    def delete_activity(self, turn_context: TurnContext, reference: ConversationReference):
+        results = await self._slack_client.update(message.time_stamp, message.channel, message.text, cancellation_token)
+
+        if results is None:
+            raise Exception(f'Error updating activity on Slack:{results}')
+
+        resource_response = ResourceResponse()
+        resource_response.id = activity.id
+
+        return resource_response
+
+    async def delete_activity(self, turn_context: TurnContext, reference: ConversationReference, cancellation_token):
+        if turn_context is None:
+            ValueError(type(turn_context))
+
+        if reference is None:
+            ValueError(type(reference))
+
+        if reference.channel_id is None:
+            ValueError(type(reference.channel_id))
+
+        if turn_context.activity.timestamp is None:
+            ValueError(type(turn_context.activity.timestamp))
+
+        await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime, cancellation_token)
