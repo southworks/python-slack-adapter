@@ -6,16 +6,18 @@ from slack_adapter import NewSlackMessage
 Object = lambda **kwargs: type("Object", (), kwargs)
 
 
-def activity_to_slack(activity: Activity):
-    if not activity:
-        raise Exception
+class SlackHelper:
 
-    message = NewSlackMessage()
-    if not activity.timestamp:
-        attachments = []
+    def activity_to_slack(activity: Activity):
+        if not activity:
+            raise Exception
 
-        for att in activity.attachments:
-            if att.name == 'blocks':
-                message.blocks = [att.content]
-            else:
-                new_attachment = Object(author_name= att.name, thumb_url=att.thumbnail_url)
+        message = NewSlackMessage()
+        if not activity.timestamp:
+            attachments = []
+
+            for att in activity.attachments:
+                if att.name == 'blocks':
+                    message.blocks = [att.content]
+                else:
+                    new_attachment = Object(author_name= att.name, thumb_url=att.thumbnail_url)
