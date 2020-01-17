@@ -8,7 +8,8 @@ Object = lambda **kwargs: type("Object", (), kwargs)
 
 class SlackHelper:
 
-    def activity_to_slack(activity: Activity):
+    @staticmethod
+    def activity_to_slack(activity: Activity) -> NewSlackMessage:
         if not activity:
             raise Exception
 
