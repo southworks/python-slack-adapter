@@ -296,11 +296,11 @@ class SlackClientWrapper:
         # ToDo: look for this method's equivalent in slack client for Python
         return await self._api.chat_postEphemeral(channel=channel, user=user)
 
-    async def post_message(self, channel):
+    async def post_message(self, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, blocks, attachments, unfurl_links: bool, icon_url, icon_emoji, as_user: bool, cancellation_token):
         """
-
+            Wraps Slack API's PostMessageAsync method.
         """
-        return await self._api.chat_postMessage(channel=channel)
+        return await self._api.chat_postMessage(channel_id, text, bot_name, parse, link_names, blocks, attachments, unfurl_links, icon_url, icon_emoji, as_user, cancellation_token)
 
     async def search_all(self, query):
         """
