@@ -300,7 +300,7 @@ class SlackClientWrapper:
         """
             Wraps Slack API's PostMessageAsync method.
         """
-        return await self._api.chat_postMessage(channel_id, text, bot_name, parse, link_names, blocks, attachments, unfurl_links, icon_url, icon_emoji, as_user, cancellation_token)
+        return await self._api.chat_postMessage(channel=channel_id, text=text, bot_name=bot_name, parse=parse, link_names=link_names, blocks=blocks, attachments=attachments, unfurl_links=unfurl_links, icon_url=icon_url, icon_emoji=icon_emoji, as_user=as_user, cancellation_token=cancellation_token)
 
     async def search_all(self, query):
         """
