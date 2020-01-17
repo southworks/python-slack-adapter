@@ -4,7 +4,8 @@ from botbuilder.core import TurnContext
 from botframework.connector.models import ActivityTypes, ConversationAccount
 from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
-from slack_adapter import NewSlackMessage, slack_helper
+from .slack_helper import SlackHelper
+from slack_adapter import NewSlackMessage
 from logging import Logger
 
 class SlackAdapter:
@@ -90,6 +91,23 @@ class SlackAdapter:
 
         return responses
 
-    def update_activity(self, turn_context: TurnContext, activity: Activity):
+
+    async def update_activity(self, turn_context: TurnContext, activity: Activity, cancellation_token):
+        if turn_context is None:
+            ValueError(type(turn_context))
+
+        if activity is None:
+            ValueError(type(activity))
+
+        if activity.id is None:
+            ValueError(type(activity.id))
+
+        if activity.id is None:
+            ValueError(type(activity.timestamp))
+
+        if activity.conversation is None:
+            ValueError(type(activity.channel_id))
+
+        message = Sla
 
     def delete_activity(self, turn_context: TurnContext, reference: ConversationReference):
