@@ -16,8 +16,8 @@ class SlackMessage:
         return self._time_stamp
 
     @property
-    def usarname(self) -> str:
-        return self._usarname
+    def username(self) -> str:
+        return self.username
 
     @property
     def bot_id(self) -> str:
