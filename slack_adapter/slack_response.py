@@ -1,14 +1,16 @@
 class SlackResponse:
     @property
     def ok(self):
-        pass
+        return self._ok
+
     @property
     def channel(self):
-        pass
+        return self._channel
+
     @property
     def time_stamp(self):
-        pass
+        return self._time_stamp
+
     @property
     def message(self):
-        pass
-            
+        return self._message
