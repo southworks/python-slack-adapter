@@ -2,7 +2,9 @@
 ## Publish a package
 
 ### Test env
+
 Right now, the workflow publishes a test package every time a PR is created. Thi worflow takes @Aliandi's credentials, to change them you have to go to the Secrets settings and create them again using the new values.
+
 _NOTE: for this to work, the PR should update the package version on the setup.py file. This being vX.y where X is the version that's being worked on and y would be the feature number_
 
 ### Prod env
