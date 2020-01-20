@@ -59,12 +59,8 @@ class SlackPayload:
     def actions(self):
         return self._actions
 
-    @actions.setter
-    def actions(self, actions):
-        self._actions = actions
-
     def __init__(self, type=None, token=None, channel=None, thread_time_stamp= None, team=None,
-                 message=None, user=None, actions=None):
+                 message=None, user=None):
         self._type = type
         self._token = token
         self._channel = channel
@@ -72,4 +68,3 @@ class SlackPayload:
         self._team = team
         self._message = message
         self._user = user
-        self._actions = actions
