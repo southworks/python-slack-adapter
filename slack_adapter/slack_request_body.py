@@ -60,10 +60,6 @@ class SlackRequestBody:
     def authed_users(self):
         return self._authed_users
 
-    @authed_users.setter
-    def authed_users(self, authed_users):
-        self._authed_users = authed_users
-
     @property
     def trigger_id(self):
         return self._trigger_id
@@ -120,7 +116,7 @@ class SlackRequestBody:
     def event(self, event):
         self._event = event
 
-    def __init__(self, challenge=None, token=None, team_id=None, api_app_id=None, type=None, event_id=None, event_time=None, authed_users=None, trigger_id=None, channel_id=None, user_id=None, text=None, command=None, payload=None, event=None):
+    def __init__(self, challenge=None, token=None, team_id=None, api_app_id=None, type=None, event_id=None, event_time=None, trigger_id=None, channel_id=None, user_id=None, text=None, command=None, payload=None, event=None):
         self._challenge = challenge
         self._token = token
         self._team_id = team_id
@@ -128,7 +124,6 @@ class SlackRequestBody:
         self._type = type
         self._event_id = event_id
         self._event_time = event_time
-        self._authed_users = authed_users
         self._trigger_id = trigger_id
         self._channel_id = channel_id
         self._user_id = user_id
