@@ -1,9 +1,9 @@
-from typing import List
+from typing import List, Dict
 
 import slack
 from botbuilder.schema import Activity
 
-from slack_adapter import NewSlackMessage
+from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 
 Object = lambda **kwargs: type("Object", (), kwargs)
 
@@ -99,3 +99,60 @@ class SlackHelper:
             message.as_user = False
 
         return message
+
+    @staticmethod
+    def deserialize_body(request_body: str) -> SlackRequestBody:
+        """ Deserializes the request's body as a SlackRequestBody object.
+        :parameters
+            str requestBody: The query string to convert.
+        :returns:
+            A dictionary with the query values.
+        """
+
+        if not request_body:
+            return None
+
+        if "command=%2F" in request_body:
+            command_body = SlackHelper.query_string_to_dictionary(request_body)
+            # TODO: See a replacement for Newtonsoft Json
+            #return JsonConvert.DeserializeObject()
+
+        if "payload=" in request_body:
+            #  Decode and remove "payload=" from the body
+            # decodedBody = Uri.UnescapeDataString(requestBody).Remove(0, 8)
+
+            # TODO: Resolve the Json library issue
+            # payload = JsonConvert.DeserializeObject<SlackPayload>(decodedBody);
+            payload: SlackPayload
+
+            # TODO: The SlackRequestBody init needs the properties passed below
+            return SlackRequestBody(payload=payload, token=payload.token)
+
+        # return JsonConvert.DeserializeObject<SlackRequestBody>(requestBody, new UnixDateTimeConverter())
+        return ""
+
+    @staticmethod
+    def query_string_to_dictionary(query: str) -> Dict[str, str]:
+        """ Converts a query string to a dictionary with key-value pairs.
+        :parameters
+            str query: The query string to convert.
+        :returns:
+            A dictionary with the query values.
+        """
+        from urllib.parse import unquote
+
+        values = Dict[str, str] = dict()
+
+        if not query:
+            return values
+
+        pairs = query.replace("+", "%20").split('&')
+
+        for p in pairs:
+            pair = p.split('=')
+            key = pair[0]
+            value = unquote(pair[1])
+
+            values[key] = value
+
+        return values
