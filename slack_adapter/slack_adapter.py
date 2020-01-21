@@ -8,7 +8,9 @@ from .slack_helper import SlackHelper
 from slack_adapter import NewSlackMessage, slack_helper
 from logging import Logger
 
+
 class SlackAdapter:
+
     @property
     def __options(self):
         return self._options
@@ -64,6 +66,17 @@ class SlackAdapter:
         pass
 
     async def send_activities(self, turn_context: TurnContext, activities: list[Activity], cancellation_token):
+
+        """
+
+        # Standard BotBuilder adapter method to send a message from the bot to the messaging API.
+        # param name="turnContext" A TurnContext representing the current incoming message and environment.
+        # param name="activities" An array of outgoing activities to be sent back to the messaging API.
+        # param name="cancellationToken" A cancellation token for the task.
+        # Returns an array of see cref="ResourceResponse" objects containing the IDs that Slack assigned to the sent messages.
+
+        """
+
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -93,6 +106,13 @@ class SlackAdapter:
         return responses
 
     async def update_activity(self, turn_context: TurnContext, activity: Activity, cancellation_token):
+
+        """
+        # param name = "turnContext" A TurnContext representing the current incoming message and environment
+        # param name = "activity" The updated activity in the form '{id: `id of activity to update`, ...}'
+        # param name = "cancellationToken" A cancellation token for the task
+        """
+
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -121,6 +141,14 @@ class SlackAdapter:
         return resource_response
 
     async def delete_activity(self, turn_context: TurnContext, reference: ConversationReference, cancellation_token):
+
+        """
+           # param name="turnContext" A TurnContext representing the current incoming message and environment.
+           # param name="reference" An object in the form
+           "{activityId: `id of message to delete`, conversation: { id: `id of slack channel`}}"
+           # param name="cancellationToken" A cancellation token for the task
+        """
+
         if turn_context is None:
             ValueError(type(turn_context))
 
