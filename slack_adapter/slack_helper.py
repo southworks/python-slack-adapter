@@ -193,8 +193,13 @@ class SlackHelper:
             raise Exception("slack_payload")
 
         new_conversation_account = ConversationAccount(id=slack_payload.channel.id)
-        new_channel_account_from = ChannelAccount()
-        new_channel_account_recipient = ChannelAccount()
+        # Id = slackPayload.Message?.BotId ?? slackPayload.User.id
+        if slack_payload.message.bot_id:
+            id_2 = slack_payload.message.bot_id
+        else:
+            id_2 = slack_payload.user.id
+        new_channel_account_from = ChannelAccount(id=id_2)
+        new_channel_account_recipient = ChannelAccount(id=None)
 
         # create activity
         activity = Activity(timestamp=datetime.utcnow(),
@@ -202,41 +207,15 @@ class SlackHelper:
                             conversation=new_conversation_account,
                             from_property=new_channel_account_from,
                             recipient=new_channel_account_recipient,
-                            channel_data=slack_body,
-                            text=slack_body.text,
+                            channel_data=slack_payload,
+                            text=None,
                             type=ActivityTypes.event)
-        """ 
-            var activity = new Activity()
-            {
-                Timestamp = default,
-                ChannelId = "slack",
-                Conversation = new ConversationAccount()
-                {
-                    Id = slackPayload.Channel.id,
-                },
-                From = new ChannelAccount()
-                {
-                    Id = slackPayload.Message?.BotId ?? slackPayload.User.id,
-                },
-                Recipient = new ChannelAccount()
-                {
-                    Id = null,
-                },
-                ChannelData = slackPayload,
-                Text = null,
-                Type = ActivityTypes.Event,
-            };
 
-            if (slackPayload.ThreadTs != null)
-            {
-                activity.Conversation.Properties["thread_ts"] = slackPayload.ThreadTs;
-            }
+        if slack_payload.thread_time_stamp:
+            activity.conversation["thread_ts"] = slack_payload.thread_time_stamp
 
-            if (slackPayload.Actions != null && (slackPayload.Type == "block_actions" || slackPayload.Type == "interactive_message"))
-            {
-                activity.Type = ActivityTypes.Message;
-                activity.Text = slackPayload.Actions[0].Value;
-            }
+        if not slack_payload.actions and (slack_payload.type == "block_actions" or slack_payload.type == "interactive_message"):
+            activity.Type = ActivityTypes.message
+            activity.Text = slack_payload.actions[0]
 
-            return activity;
-        """
+        return activity
