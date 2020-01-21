@@ -4,6 +4,7 @@ import slack
 from botbuilder.schema import Activity
 
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
+from slack_adapter.slack_client_wrapper import SlackClientWrapper
 
 Object = lambda **kwargs: type("Object", (), kwargs)
 
@@ -115,7 +116,7 @@ class SlackHelper:
         if "command=%2F" in request_body:
             command_body = SlackHelper.query_string_to_dictionary(request_body)
             # TODO: See a replacement for Newtonsoft Json
-            #return JsonConvert.DeserializeObject()
+            # return JsonConvert.DeserializeObject()
 
         if "payload=" in request_body:
             #  Decode and remove "payload=" from the body
@@ -141,7 +142,7 @@ class SlackHelper:
         """
         from urllib.parse import unquote
 
-        values = Dict[str, str] = dict()
+        values: Dict[str, str] = dict()
 
         if not query:
             return values
@@ -156,3 +157,10 @@ class SlackHelper:
             values[key] = value
 
         return values
+
+    @staticmethod
+    def command_to_activity_async(slack_body: SlackRequestBody,
+                                        client: SlackClientWrapper, cancellation_token):
+        Task
+
+    pass
