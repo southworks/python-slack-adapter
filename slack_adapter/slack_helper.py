@@ -37,10 +37,9 @@ class SlackHelper:
         if not slack_body:
             raise Exception("slack_body")
 
-        # TODO: Review values
-        new_conversation_account = ConversationAccount()
-        new_channel_account_from = ChannelAccount()
-        new_channel_account_recipient = ChannelAccount()
+        new_conversation_account = ConversationAccount(id=slack_body.channel_id)
+        new_channel_account_from = ChannelAccount(user_id=slack_body.user_id)
+        new_channel_account_recipient = ChannelAccount(id=None)
 
         # create activity
         activity = Activity(id=slack_body.trigger_id,
