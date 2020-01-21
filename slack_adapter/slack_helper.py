@@ -103,3 +103,27 @@ class SlackHelper:
         activity.conversation["team"] = slack_body.team_id
 
         return activity
+
+    @staticmethod
+    def query_string_to_dictionary(query: str) -> Dict[str, str]:
+        """ Converts a query string to a dictionary with key-value pairs.
+        :param query: The query string to convert.
+        :return: A dictionary with the query values.
+        """
+        from urllib.parse import unquote
+
+        values: Dict[str, str] = dict()
+
+        if not query:
+            return values
+
+        pairs = query.replace("+", "%20").split('&')
+
+        for p in pairs:
+            pair = p.split('=')
+            key = pair[0]
+            value = unquote(pair[1])
+
+            values[key] = value
+
+        return values
