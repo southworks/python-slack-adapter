@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/misc.xml
+*.iml
+.idea/vcs.xml
+.idea/modules.xml
+slack_adapter/.idea/inspectionProfiles/profiles_settings.xml
+slack_adapter/.idea/misc.xml
+slack_adapter/.idea/modules.xml
+slack_adapter/.idea/vcs.xml
