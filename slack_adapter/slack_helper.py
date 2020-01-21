@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import List, Dict
 
 import slack
-from botbuilder.schema import Activity
+from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
 
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
@@ -14,9 +15,9 @@ class SlackHelper:
     @staticmethod
     def activity_to_slack(activity: Activity) -> NewSlackMessage:
         """ Formats a BotBuilder activity into an outgoing Slack message.
-        :parameters
+        Args:
             Activity activity: A BotBuilder Activity object.
-        :returns:
+        Returns:
             A Slack message object with {text, attachments, channel, thread ts}
             as well as any fields found in activity.channelData.
         """
@@ -104,9 +105,9 @@ class SlackHelper:
     @staticmethod
     def deserialize_body(request_body: str) -> SlackRequestBody:
         """ Deserializes the request's body as a SlackRequestBody object.
-        :parameters
+        Args:
             str requestBody: The query string to convert.
-        :returns:
+        Returns:
             A dictionary with the query values.
         """
 
@@ -135,9 +136,9 @@ class SlackHelper:
     @staticmethod
     def query_string_to_dictionary(query: str) -> Dict[str, str]:
         """ Converts a query string to a dictionary with key-value pairs.
-        :parameters
+        Args:
             str query: The query string to convert.
-        :returns:
+        Returns:
             A dictionary with the query values.
         """
         from urllib.parse import unquote
@@ -159,8 +160,35 @@ class SlackHelper:
         return values
 
     @staticmethod
-    def command_to_activity_async(slack_body: SlackRequestBody,
-                                        client: SlackClientWrapper, cancellation_token):
-        Task
+    def command_to_activity_async(slack_body: SlackRequestBody, client: SlackClientWrapper, cancellation_token):
+        """ Creates an activity based on a slack event related to a slash command
+        Args:
+            slack_body: The data of the slack event.
+            client: The Slack client.
+            cancellation_token: A cancellation token for the task.
+        Returns: An activity containing the event data.
+        """
+        if not slack_body:
+            # TODO: Mimic .net intention using
+            raise Exception("slack_body")
 
-    pass
+        # TODO: Review values
+        new_conversation_account = ConversationAccount()
+        new_channel_account_from = ChannelAccount()
+        new_channel_account_recipient = ChannelAccount()
+
+        # create activity
+        activity = Activity(id=slack_body.trigger_id,
+                            timestamp=datetime.utcnow(),
+                            channel_id="slack",
+                            conversation=new_conversation_account,
+                            from_property=new_channel_account_from,
+                            recipient=new_channel_account_recipient,
+                            channel_data=slack_body,
+                            text=slack_body.text,
+                            type="event")
+
+        activity.recipient.id = client.get_bot_user_by_team(activity, cancellation_token)
+        activity.conversation["team"] = slack_body.team_id
+
+        return activity
