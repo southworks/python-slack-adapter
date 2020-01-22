@@ -2,10 +2,12 @@ from datetime import datetime
 from typing import List, Dict
 
 import slack
-from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
+from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes, Attachment
 
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
+
+from slack.web.classes import attachments
 
 Object = lambda **kwargs: type("Object", (), kwargs)
 
