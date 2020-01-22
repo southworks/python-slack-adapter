@@ -153,7 +153,7 @@ class SlackHelper:
         return values
 
     @staticmethod
-    def command_to_activity_async(slack_body: SlackRequestBody, client: SlackClientWrapper, cancellation_token):
+    async def command_to_activity_async(slack_body: SlackRequestBody, client: SlackClientWrapper, cancellation_token):
         """ Creates an activity based on a slack event related to a slash command
         :param slack_body: The data of the slack event.
         :param client: The Slack client.
@@ -161,7 +161,7 @@ class SlackHelper:
         :return: An activity containing the event data.
         """
         if not slack_body:
-            raise Exception("slack_body")
+            raise TypeError("slack_body")
 
         new_conversation_account = ConversationAccount(id=slack_body.channel_id)
         new_channel_account_from = ChannelAccount(user_id=slack_body.user_id)
@@ -178,7 +178,7 @@ class SlackHelper:
                             text=slack_body.text,
                             type=ActivityTypes.event)
 
-        activity.recipient.id = client.get_bot_user_by_team(activity, cancellation_token)
+        activity.recipient.id = await client.get_bot_user_by_team(activity, cancellation_token)
         activity.conversation["team"] = slack_body.team_id
 
         return activity
