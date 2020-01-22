@@ -4,6 +4,7 @@ from .file_types import FileTypes
 from botbuilder.schema import Activity
 from .slack_adapter_options import SlackAdapterOptions
 from .presence import Presence
+from slack_adapter import NewSlackMessage
 import slack
 
 
@@ -33,6 +34,8 @@ class SlackClientWrapper:
         """
             Initializes a new instance of the <see cref="SlackClientWrapper"/> class.
             Creates a Slack client by supplying the access token.
+
+            :param options: An object containing API credentials, a webhook verification token and other options.
         """
         self._options = options if options else ValueError(type(options))
         if not options.slack_verification_token and not options.slack_client_sign_in_secret:
@@ -53,12 +56,22 @@ class SlackClientWrapper:
     async def add_reaction(self, name=None, channel=None, time_stamp=None, cancellation_token=None):
         """
             Wraps Slack API's AddReactionAsync method.
+            @param name: The optional name.
+            @param channel: The optional channel.
+            @param time_stamp: The optional timestamp.
+            @param cancellation_token: A cancellation token for the task.
+            @rtype: SlackResponse
+            @returns: The SlackResponse representing the response to the reaction added.
         """
         return await self._api.reactions_add(name=name)
 
-    async def API_request_with_token(self, cancellation_token, *post_parameters):
+    async def api_request_with_token(self, cancellation_token=None, *post_parameters):
         """
             Wraps Slack API's APIRequestWithTokenAsync method.
+            @param cancellation_token: A cancellation token for the task.
+            @param post_parameters: The parameters to the POST request.
+            @rtype: SlackResponse
+            @returns: The SlackResponse representing the response to the reaction added.
         """
         # ToDo: look for this method's equivalent in slack client for Python
         return await self._api.API_request_with_token(post_parameters).configure_await(False)\
@@ -88,6 +101,11 @@ class SlackClientWrapper:
     async def delete_message(self, channel_id, ts, cancellation_token):
         """
             Wraps Slack API's DeleteMessageAsync method.
+            @param channel_id: The channel to delete the message from.
+            @param ts: The timestamp of the message.
+            @param cancellation_token: A cancellation token for the task.
+            @rtype: SlackResponse
+            @returns: The SlackResponse to the posting operation.
         """
         # ToDo: look for this method's equivalent in slack client for Python
         return await self._api.delete_message(channel_id, ts).configure_await(False)
@@ -299,8 +317,31 @@ class SlackClientWrapper:
     async def post_message(self, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, blocks, attachments, unfurl_links: bool, icon_url, icon_emoji, as_user: bool, cancellation_token):
         """
             Wraps Slack API's PostMessageAsync method.
+            @param channel_id: The channel id.
+            @param text: The text of the message.
+            @param bot_name: The bot name.
+            @param parse: Change how messages are treated.
+            @param link_names: If to find and link channel names and username.
+            @param blocks: A JSON-based array of structured blocks, presented as a URL-encoded string.
+            @param attachments: The attachments, if any.
+            @param unfurl_links: True to enable unfurling of primarily text-based content.
+            @param icon_url: The url of the icon with the message, if any.
+            @param icon_emoji: The emoji icon, if any.
+            @param as_user: If the message is being sent as user instead of as a bot.
+            @param cancellation_token: A cancellation token for the task.
+            @rtype: SlackResponse
+            @returns: The SlackResponse to the posting operation.
         """
         return await self._api.chat_postMessage(channel=channel_id, text=text, bot_name=bot_name, parse=parse, link_names=link_names, blocks=blocks, attachments=attachments, unfurl_links=unfurl_links, icon_url=icon_url, icon_emoji=icon_emoji, as_user=as_user, cancellation_token=cancellation_token)
+
+    async def post_message(self, message: NewSlackMessage, cancellation_token):
+        """
+            Wraps Slack API's PostMessageAsync method.
+            @param message: The channel id.
+            @param cancellation_token: A cancellation token for the task.
+            @rtype: SlackResponse
+            @returns: The SlackResponse to the posting operation.
+        """
 
     async def search_all(self, query):
         """
@@ -326,12 +367,23 @@ class SlackClientWrapper:
         """
         return await self._api.auth_test().user_id
 
-    async def update(self, channel, ts):
+    async def update(self, ts: str, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, attachments, as_user: bool, cancellation_token):
         """
-
+            Wraps Slack API's UpdateAsync method
+            @param ts: The timestamp of the message.
+            @param channel_id: The channel to delete the message from.
+            @param text: The text to update with.
+            @param bot_name: The optional bot name.
+            @param parse: Change how messages are treated.Defaults to 'none'.
+            @param link_names: f to find and link channel names and username.
+            @param attachments: The attachments, if any.
+            @param as_user: If the message is being sent as user instead of as a bot.
+            @param cancellation_token: A cancellation token for the task.
+            @rtype: SlackResponse
+            @returns: The SlackResponse to the posting operation.
         """
         # ToDo: to I have to update the chat here?
-        return await self._api.chat_update(channel=channel, ts=ts)
+        return await self._api.chat_update(ts=ts, channel_id=channel_id, bot_name=bot_name, parse=parse, link_names=link_names, attachments=attachments, as_user=as_user, cancellation_token=cancellation_token)
 
     async def upload_file(self, file, content):
         """
