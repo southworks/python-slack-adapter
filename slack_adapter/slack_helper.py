@@ -35,7 +35,7 @@ class SlackHelper:
         :return: An activity containing the event data.
         """
         if not slack_body:
-            raise Exception("slack_body")
+            raise TypeError("slack_body")
 
         new_conversation_account = ConversationAccount(id=slack_body.channel_id)
         new_channel_account_from = ChannelAccount(user_id=slack_body.user_id)
