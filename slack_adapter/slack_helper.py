@@ -24,10 +24,10 @@ class SlackHelper:
                 if att.name == 'blocks':
                     message.blocks = [att.content]
                 else:
-                    new_attachment = Object(author_name= att.name, thumb_url=att.thumbnail_url)
+                    new_attachment = Object(author_name=att.name, thumb_url=att.thumbnail_url)
 
     @staticmethod
-    def command_to_activity_async(slack_body: SlackRequestBody, client: SlackClientWrapper, cancellation_token):
+    async def command_to_activity_async(slack_body: SlackRequestBody, client: SlackClientWrapper, cancellation_token):
         """ Creates an activity based on a slack event related to a slash command
         :param slack_body: The data of the slack event.
         :param client: The Slack client.
@@ -52,7 +52,7 @@ class SlackHelper:
                             text=slack_body.text,
                             type=ActivityTypes.event)
 
-        activity.recipient.id = client.get_bot_user_by_team(activity, cancellation_token)
+        activity.recipient.id = await client.get_bot_user_by_team(activity, cancellation_token)
         activity.conversation["team"] = slack_body.team_id
 
         return activity
