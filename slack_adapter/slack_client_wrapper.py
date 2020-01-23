@@ -110,7 +110,7 @@ class SlackClientWrapper:
             @returns: The SlackResponse to the posting operation.
         """
         # ToDo: look for this method's equivalent in slack client for Python
-        return await self._api.delete_message(channel_id, ts).configure_await(False)
+        return await self._api.chat_delete(channel_id, ts)
 
     async def dialog_open(self, trigger_id, dialog, cancellation_token):
         """
