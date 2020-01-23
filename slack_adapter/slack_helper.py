@@ -27,6 +27,41 @@ class SlackHelper:
                     new_attachment = Object(author_name= att.name, thumb_url=att.thumbnail_url)
 
     @staticmethod
+    def payload_to_activity(slack_payload: SlackPayload) -> Activity:
+        """ Creates an activity based on the slack event payload.
+        :param slack_payload: The payload of the slack event.
+        :return An activity containing the event data.
+        """
+        if not slack_payload:
+            raise TypeError("slack_payload")
+
+        new_conversation_account = ConversationAccount(id=slack_payload.channel.id)
+        channel_account_id = slack_payload.message.bot_id if slack_payload.message.bot_id else slack_payload.user.id
+
+        new_channel_account_from = ChannelAccount(id=channel_account_id)
+        new_channel_account_recipient = ChannelAccount(id=None)
+
+        # create activity
+        activity = Activity(timestamp=datetime.utcnow(),
+                            channel_id="slack",
+                            conversation=new_conversation_account,
+                            from_property=new_channel_account_from,
+                            recipient=new_channel_account_recipient,
+                            channel_data=slack_payload,
+                            text=None,
+                            type=ActivityTypes.event)
+
+        if slack_payload.thread_time_stamp:
+            activity.conversation["thread_ts"] = slack_payload.thread_time_stamp
+
+        if slack_payload.actions and \
+                (slack_payload.type == "block_actions" or slack_payload.type == "interactive_message"):
+            activity.Type = ActivityTypes.message
+            activity.Text = slack_payload.actions[0]
+
+        return activity
+        
+    @staticmethod
     def command_to_activity_async(slack_body: SlackRequestBody, client: SlackClientWrapper, cancellation_token):
         """ Creates an activity based on a slack event related to a slash command
         :param slack_body: The data of the slack event.
