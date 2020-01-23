@@ -408,7 +408,6 @@ class SlackClientWrapper:
             @rtype: SlackResponse
             @returns: The SlackResponse to the posting operation.
         """
-        # ToDo: to I have to update the chat here?
         return await self._api.chat_update(ts=ts, channel_id=channel_id, bot_name=bot_name, parse=parse, link_names=link_names, attachments=attachments, as_user=as_user, cancellation_token=cancellation_token)
 
     async def upload_file(self, file, content):
