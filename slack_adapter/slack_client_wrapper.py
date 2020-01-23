@@ -1,11 +1,13 @@
 import struct
-
+import json
 from .file_types import FileTypes
 from botbuilder.schema import Activity
 from .slack_adapter_options import SlackAdapterOptions
 from .presence import Presence
 from slack_adapter import NewSlackMessage
 import slack
+import http.client
+from multipledispatch import dispatch
 
 
 class SlackClientWrapper:
@@ -314,6 +316,7 @@ class SlackClientWrapper:
         # ToDo: look for this method's equivalent in slack client for Python
         return await self._api.chat_postEphemeral(channel=channel, user=user)
 
+    @dispatch(str, str, str, str, bool, )
     async def post_message(self, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, blocks, attachments, unfurl_links: bool, icon_url, icon_emoji, as_user: bool, cancellation_token):
         """
             Wraps Slack API's PostMessageAsync method.
@@ -334,7 +337,8 @@ class SlackClientWrapper:
         """
         return await self._api.chat_postMessage(channel=channel_id, text=text, bot_name=bot_name, parse=parse, link_names=link_names, blocks=blocks, attachments=attachments, unfurl_links=unfurl_links, icon_url=icon_url, icon_emoji=icon_emoji, as_user=as_user, cancellation_token=cancellation_token)
 
-    async def post_message(self, message: NewSlackMessage, cancellation_token):
+    @dispatch(object, str)
+    async def post_message(self, message: NewSlackMessage, cancellation_token: str):
         """
             Wraps Slack API's PostMessageAsync method.
             @param message: The channel id.
@@ -342,6 +346,28 @@ class SlackClientWrapper:
             @rtype: SlackResponse
             @returns: The SlackResponse to the posting operation.
         """
+        if message is None:
+            return None
+
+        data = dict([
+            ('token', self.options.slack_bot_token),
+            ('channel', message.channel),
+            ('text', message.text),
+            ('thread_ts', message.thread_time_stamp),
+        ])
+
+        if message.blocks is not None:
+            data["blocks"] = json.dumps(message.blocks)
+
+        if message.ephemeral is not None:
+            url = self.post_ephemeral_message_url
+        else:
+            url = self.post_message_url
+
+        conn = http.client.HTTPConnection(url)
+        response = conn.request("POST", data)
+
+        return json.loads(response)
 
     async def search_all(self, query):
         """
