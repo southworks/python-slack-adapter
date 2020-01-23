@@ -55,7 +55,8 @@ class SlackHelper:
         if slack_payload.thread_time_stamp:
             activity.conversation["thread_ts"] = slack_payload.thread_time_stamp
 
-        if not slack_payload.actions and (slack_payload.type == "block_actions" or slack_payload.type == "interactive_message"):
+        if slack_payload.actions and \
+                (slack_payload.type == "block_actions" or slack_payload.type == "interactive_message"):
             activity.Type = ActivityTypes.message
             activity.Text = slack_payload.actions[0]
 
