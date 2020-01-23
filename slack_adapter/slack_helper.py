@@ -24,8 +24,7 @@ class SlackHelper:
                 if att.name == 'blocks':
                     message.blocks = [att.content]
                 else:
-                    new_attachment = Object(author_name= att.name, thumb_url=att.thumbnail_url)
-
+                    new_attachment = Object(author_name=att.name, thumb_url=att.thumbnail_url)
     @staticmethod
     def payload_to_activity(slack_payload: SlackPayload) -> Activity:
         """ Creates an activity based on the slack event payload.
