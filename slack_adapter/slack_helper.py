@@ -4,12 +4,14 @@ import json
 import unicodedata
 from http.client import HTTPResponse
 from http import HTTPStatus
-from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
+from slack.web.classes.attachments import Attachment
 from requests import status_codes
-
+from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
-from slack.web.classes.attachments import Attachment
+from slack_adapter.slack_event import SlackEvent
+
+
 
 Object = lambda **kwargs: type("Object", (), kwargs)
 
@@ -192,3 +194,45 @@ class SlackHelper:
         data = encoding.encode('utf-8')
 
         # ToDo: Search a write_async method
+
+    @staticmethod
+    def event_to_activity(self, slack_event: SlackEvent, client: SlackClientWrapper, cancellation_token):
+        if slack_event is not None:
+            raise TypeError(slack_event)
+
+        conversation_account_id = slack_event.item_channel if slack_event.event.item_channel else slack_event.channel_id
+        new_conversation_account = ConversationAccount(id=conversation_account_id)
+
+        channel_account_id = slack_event.event.bot_id if slack_event.event.bot_id else slack_event.user_id
+        new_channel_account_from = ChannelAccount(id=channel_account_id)
+        new_channel_account_recipient = ChannelAccount(id=None)
+
+        # create activity
+        activity = Activity(id=slack_event.event_time_stamp,
+                            timestamp=datetime.utcnow(),
+                            channel_id="slack",
+                            conversation=new_conversation_account,
+                            from_property=new_channel_account_from,
+                            recipient=new_channel_account_recipient,
+                            channel_data=slack_event,
+                            text=None,
+                            type=ActivityTypes.event)
+
+        if slack_event.thread_time_stamp:
+            activity.conversation["thread_ts"] = slack_event.thread_time_stamp
+
+        if activity.conversation is None:
+            if slack_event.item is not None and slack_event.item_channel is not None:
+                activity.conversation["id"] = slack_event.item_channel
+            else:
+                activity.conversation["id"] = slack_event.item
+
+        activity.recipient.id = await client.get_bot_user_by_team(activity, cancellation_token)
+
+        # If this is conclusively a message originating from a user, we'll mark it as such
+        if slack_event.type == 'message' and slack_event.subtype is None:
+            if slack_event.item is not None and slack_event.item_channel is not None:
+                activity.type = ActivityTypes.message
+                activity.text= slack_event.text
+
+        return activity
