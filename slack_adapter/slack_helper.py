@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Dict
-import slack
+import json
 from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
@@ -68,22 +68,16 @@ class SlackHelper:
         # Check if it's a command event
         if "command=%2F" in request_body:
             command_body = SlackHelper.query_string_to_dictionary(request_body)
-            # return JsonConvert.DeserializeObject<SlackRequestBody>(JsonConvert.SerializeObject(command_body));
-            # return JsonConvert.DeserializeObject()
+            return json.loads(SlackRequestBody(json.dumps(command_body)))
 
         if "payload=" in request_body:
             #  Decode and remove "payload=" from the body
-            # decodedBody = Uri.UnescapeDataString(requestBody).Remove(0, 8)
+            decoded_body = request_body.replace('payload=', '')
+            payload: json.loads(decoded_body)
 
-            # TODO: Resolve the Json library issue
-            # payload = JsonConvert.DeserializeObject<SlackPayload>(decodedBody);
-            payload: SlackPayload
-
-            # TODO: The SlackRequestBody init needs the properties passed below
             return SlackRequestBody(payload=payload, token=payload.token)
 
-        # return JsonConvert.DeserializeObject<SlackRequestBody>(requestBody, new UnixDateTimeConverter())
-        return ""
+        return json.loads(request_body)
 
     @staticmethod
     def query_string_to_dictionary(query: str) -> Dict[str, str]:
