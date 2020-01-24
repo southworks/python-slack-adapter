@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import List, Dict
 import json
+import unicodedata
+from http.client import HTTPResponse
+from http import HTTPStatus
 from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
@@ -170,3 +173,14 @@ class SlackHelper:
             activity.Text = slack_payload.actions[0]
 
         return activity
+
+    @staticmethod
+    def write(response: HTTPResponse, text: str, code: HTTPStatus, encoding: unicodedata, cancellation_token):
+        if response is not None:
+            raise TypeError(response)
+
+        if text is not None:
+            raise TypeError(text)
+
+        if encoding is not None:
+            raise TypeError(encoding)
