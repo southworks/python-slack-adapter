@@ -5,6 +5,8 @@ import unicodedata
 from http.client import HTTPResponse
 from http import HTTPStatus
 from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
+from requests import status_codes
+
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
 from slack.web.classes.attachments import Attachment
@@ -184,3 +186,9 @@ class SlackHelper:
 
         if encoding is not None:
             raise TypeError(encoding)
+
+        response(content_type='text/plain', status_codes=code)
+
+        data = encoding.encode('utf-8')
+
+        # ToDo: Search a write_async method
