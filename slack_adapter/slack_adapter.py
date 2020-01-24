@@ -62,7 +62,18 @@ class SlackAdapter:
 
         return message
 
-    def continue_conversation(self, reference: ConversationReference):
+    @dispatch()
+    def continue_conversation(self, reference: ConversationReference, logic, cancellation_token):
+        if not reference:
+            raise Exception("reference")
+
+        if not logic:
+            raise Exception("logic")
+
+
+
+    @dispatch()
+    def continue_conversation(self, claims_identity, reference: ConversationReference, callback, cancellation_token):
         pass
 
     async def send_activities(self, turn_context: TurnContext, activities: list[Activity], cancellation_token):
