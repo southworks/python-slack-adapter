@@ -1,14 +1,10 @@
 from datetime import datetime
 from typing import List, Dict
-
 import slack
-from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes, Attachment
-
+from botbuilder.schema import Activity, ConversationAccount, ChannelAccount, ActivityTypes
 from slack_adapter import NewSlackMessage, SlackRequestBody, SlackPayload
 from slack_adapter.slack_client_wrapper import SlackClientWrapper
-
-from slack.web.classes import attachments
-
+from slack.web.classes.attachments import Attachment
 
 Object = lambda **kwargs: type("Object", (), kwargs)
 
@@ -17,7 +13,6 @@ class SlackHelper:
 
     @staticmethod
     def activity_to_slack(activity: Activity) -> NewSlackMessage:
-        # attachments = List[slack.web.classes.attachments.Attachment]
 
         if not activity:
             raise Exception(activity.name)
@@ -25,38 +20,36 @@ class SlackHelper:
         message = NewSlackMessage()
 
         if not activity.timestamp:
-            message.time_stamp = activity.timestamp
+            message.time_stamp = str(activity.timestamp.datetime)
 
         message.text = activity.text
 
         if activity.attachments:
-            attachment_list: List[slack.web.classes.attachments.Attachment] = list()
+            attachment_list: List[Attachment] = list()
 
             for att in activity.attachments:
                 if att.name == 'blocks':
-                    message.blocks = [att.content]
+                    message.blocks = att.content
                 else:
-                    new_attachment: slack.web.classes.attachments.Attachment
-                    new_attachment = slack.web.classes.attachments.Attachment(author_name=att.name, thumb_url=att.thumbnail_url)
+                    new_attachment: Attachment()
+                    new_attachment = Attachment(author_name=att.name, thumb_url=att.thumbnail_url)
                     attachment_list.append(new_attachment)
 
             if len(attachment_list) > 0:
                 message.attachments = attachment_list
 
-        # TODO: Verify that the id field exists
-        message.channel = activity.conversation.id
+        message.channel = activity.conversation
 
         if activity.conversation["thread_ts"]:
             message.thread_time_stamp = str(activity.conversation["thread_ts"])
 
         # if channelData is specified, overwrite any fields in message object
         if activity.channel_data:
-            # TODO: Implement activity.GetChannelData()
             message = NewSlackMessage(activity.channel_data)
 
         # should this message be sent as an ephemeral message
-        if message.ephemeral:
-            message.user = activity.recipient.id
+        if message.ephemeral is None:
+            message.user = activity.recipient
 
         if message.icon_url or message.icons or message.username:
             message.as_user = False
