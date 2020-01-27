@@ -1,5 +1,4 @@
-from multipledispatch import dispatch
-from logging import
+from logging import Logger
 from typing import List
 
 from botbuilder.core import TurnContext, BotAdapter
@@ -51,7 +50,7 @@ class SlackAdapter(BotAdapter):
         self._logger = logger
 
     @staticmethod
-    def activity_to_slack(activity:Activity):
+    def activity_to_slack(activity: Activity):
         channel_id = activity.conversation.id
         thread_time_stamp = activity.conversation.thread_time_stamp
 
