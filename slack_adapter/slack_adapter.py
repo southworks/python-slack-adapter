@@ -1,15 +1,18 @@
+from multipledispatch import dispatch
+from logging import
 from typing import List
+
+from botbuilder.core import TurnContext, BotAdapter
 from botbuilder.schema import Activity, ConversationReference, ResourceResponse
-from botbuilder.core import TurnContext
 from botframework.connector.models import ActivityTypes, ConversationAccount
+
+from slack_adapter import NewSlackMessage, slack_helper
 from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
 from .slack_helper import SlackHelper
-from slack_adapter import NewSlackMessage, slack_helper
-from logging import Logger
 
 
-class SlackAdapter:
+class SlackAdapter(BotAdapter):
 
     @property
     def __options(self):
@@ -43,6 +46,7 @@ class SlackAdapter:
     #     self._slack = slack.web
 
     def __init__(self, slack_client: SlackClientWrapper, logger: Logger):
+        super().__init__()
         self._slack_client = slack_client if slack_client else ValueError(type(slack_client))
         self._logger = logger
 
@@ -62,34 +66,9 @@ class SlackAdapter:
 
         return message
 
-    @dispatch()
-    def continue_conversation(self, reference: ConversationReference, logic, cancellation_token):
-        if not reference:
-            raise Exception("reference")
-
-        if not logic:
-            raise Exception("logic")
-
-
-
-    @dispatch()
-    def continue_conversation(self, claims_identity, reference: ConversationReference, callback, cancellation_token):
-        pass
-
-    async def send_activities(self, turn_context: TurnContext, activities: list[Activity], cancellation_token):
-
-        """
-
-        # Standard BotBuilder adapter method to send a message from the bot to the messaging API.
-        # param name="turnContext" A TurnContext representing the current incoming message and environment.
-        # param name="activities" An array of outgoing activities to be sent back to the messaging API.
-        # param name="cancellationToken" A cancellation token for the task.
-        # Returns an array of see cref="ResourceResponse" objects containing the IDs that Slack assigned to the sent messages.
-
-        """
-
-        if turn_context is None:
-            ValueError(type(turn_context))
+    async def send_activities(self, context: TurnContext, activities: List[Activity]) -> List[ResourceResponse]:
+        if context is None:
+            ValueError(type(context))
 
         if activities is None:
             ValueError(type(activities))
@@ -102,7 +81,7 @@ class SlackAdapter:
 
         message = slack_helper.activity_to_slack(activity)
 
-        slack_response = await self._slack_client.post_message(message, cancellation_token)
+        slack_response = await self._slack_client.post_message(message)
 
         if slack_response is None and slack_response.ok:
             resource_response = ActivityResourceResponse()
@@ -116,14 +95,7 @@ class SlackAdapter:
 
         return responses
 
-    async def update_activity(self, turn_context: TurnContext, activity: Activity, cancellation_token):
-
-        """
-        # param name = "turnContext" A TurnContext representing the current incoming message and environment
-        # param name = "activity" The updated activity in the form '{id: `id of activity to update`, ...}'
-        # param name = "cancellationToken" A cancellation token for the task
-        """
-
+    async def update_activity(self, turn_context: TurnContext, activity: Activity):
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -141,7 +113,7 @@ class SlackAdapter:
 
         message = SlackHelper.activity_to_slack();
 
-        results = await self._slack_client.update(message.time_stamp, message.channel, message.text, cancellation_token)
+        results = await self._slack_client.update(message.time_stamp, message.channel, message.text)
 
         if results is None:
             raise Exception(f'Error updating activity on Slack:{results}')
@@ -151,15 +123,7 @@ class SlackAdapter:
 
         return resource_response
 
-    async def delete_activity(self, turn_context: TurnContext, reference: ConversationReference, cancellation_token):
-
-        """
-           # param name="turnContext" A TurnContext representing the current incoming message and environment.
-           # param name="reference" An object in the form
-           "{activityId: `id of message to delete`, conversation: { id: `id of slack channel`}}"
-           # param name="cancellationToken" A cancellation token for the task
-        """
-
+    async def delete_activity(self, turn_context: TurnContext, reference: ConversationReference):
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -172,4 +136,4 @@ class SlackAdapter:
         if turn_context.activity.timestamp is None:
             ValueError(type(turn_context.activity.timestamp))
 
-        await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime, cancellation_token)
+        await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime)

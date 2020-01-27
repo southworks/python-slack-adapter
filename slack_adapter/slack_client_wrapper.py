@@ -326,12 +326,24 @@ class SlackClientWrapper:
         """
         return await self._api.auth_test().user_id
 
-    async def update(self, channel, ts):
+    async def update(self, ts: str, channel_id: str, text: str = '', bot_name: str = '', parse: str = '',
+                     link_names: bool = False, attachments=None, as_user: bool = False):
         """
-
+            Wraps Slack API's UpdateAsync method
+            @param ts: The timestamp of the message.
+            @param channel_id: The channel to delete the message from.
+            @param text: The text to update with.
+            @param bot_name: The optional bot name.
+            @param parse: Change how messages are treated.Defaults to 'none'.
+            @param link_names: f to find and link channel names and username.
+            @param attachments: The attachments, if any.
+            @param as_user: If the message is being sent as user instead of as a bot.
+            @param cancellation_token: A cancellation token for the task.
+            @rtype: SlackResponse
+            @returns: The SlackResponse to the posting operation.
         """
-        # ToDo: to I have to update the chat here?
-        return await self._api.chat_update(channel=channel, ts=ts)
+        return await self._api.chat_update(channel='', ts=ts, channel_id=channel_id, bot_name=bot_name, parse=parse,
+                                           link_names=link_names, attachments=attachments, as_user=as_user)
 
     async def upload_file(self, file, content):
         """
