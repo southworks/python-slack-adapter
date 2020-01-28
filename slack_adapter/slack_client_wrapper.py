@@ -393,7 +393,8 @@ class SlackClientWrapper:
         """
         return await self._api.auth_test().user_id
 
-    async def update(self, ts: str, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, attachments, as_user: bool, cancellation_token):
+    async def update(self, ts: str, channel_id: str, text: str = '', bot_name: str = '', parse: str = '',
+                     link_names: bool = False, attachments=None, as_user: bool = False):
         """
             Wraps Slack API's UpdateAsync method
             @param ts: The timestamp of the message.
@@ -408,7 +409,8 @@ class SlackClientWrapper:
             @rtype: SlackResponse
             @returns: The SlackResponse to the posting operation.
         """
-        return await self._api.chat_update(ts=ts, channel_id=channel_id, bot_name=bot_name, parse=parse, link_names=link_names, attachments=attachments, as_user=as_user, cancellation_token=cancellation_token)
+        return await self._api.chat_update(channel='', ts=ts, channel_id=channel_id, bot_name=bot_name, parse=parse,
+                                           link_names=link_names, attachments=attachments, as_user=as_user)
 
     async def upload_file(self, file, content):
         """

@@ -1,14 +1,18 @@
+from logging import Logger
 from typing import List
+
+from botbuilder.core import TurnContext, BotAdapter
 from botbuilder.schema import Activity, ConversationReference, ResourceResponse
-from botbuilder.core import TurnContext
 from botframework.connector.models import ActivityTypes, ConversationAccount
+
+from slack_adapter import NewSlackMessage, slack_helper
 from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
 from .slack_helper import SlackHelper
-from slack_adapter import NewSlackMessage, slack_helper
-from logging import Logger
 
-class SlackAdapter:
+
+class SlackAdapter(BotAdapter):
+
     @property
     def __options(self):
         return self._options
@@ -41,11 +45,12 @@ class SlackAdapter:
     #     self._slack = slack.web
 
     def __init__(self, slack_client: SlackClientWrapper, logger: Logger):
+        super().__init__()
         self._slack_client = slack_client if slack_client else ValueError(type(slack_client))
         self._logger = logger
 
     @staticmethod
-    def activity_to_slack(activity:Activity):
+    def activity_to_slack(activity: Activity):
         channel_id = activity.conversation.id
         thread_time_stamp = activity.conversation.thread_time_stamp
 
@@ -60,12 +65,9 @@ class SlackAdapter:
 
         return message
 
-    def continue_conversation(self, reference: ConversationReference):
-        pass
-
-    async def send_activities(self, turn_context: TurnContext, activities: list[Activity], cancellation_token):
-        if turn_context is None:
-            ValueError(type(turn_context))
+    async def send_activities(self, context: TurnContext, activities: List[Activity]) -> List[ResourceResponse]:
+        if context is None:
+            ValueError(type(context))
 
         if activities is None:
             ValueError(type(activities))
@@ -78,7 +80,7 @@ class SlackAdapter:
 
         message = slack_helper.activity_to_slack(activity)
 
-        slack_response = await self._slack_client.post_message(message, cancellation_token)
+        slack_response = await self._slack_client.post_message(message)
 
         if slack_response is None and slack_response.ok:
             resource_response = ActivityResourceResponse()
@@ -92,7 +94,7 @@ class SlackAdapter:
 
         return responses
 
-    async def update_activity(self, turn_context: TurnContext, activity: Activity, cancellation_token):
+    async def update_activity(self, turn_context: TurnContext, activity: Activity):
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -110,7 +112,7 @@ class SlackAdapter:
 
         message = SlackHelper.activity_to_slack();
 
-        results = await self._slack_client.update(message.time_stamp, message.channel, message.text, cancellation_token)
+        results = await self._slack_client.update(message.time_stamp, message.channel, message.text)
 
         if results is None:
             raise Exception(f'Error updating activity on Slack:{results}')
@@ -120,7 +122,7 @@ class SlackAdapter:
 
         return resource_response
 
-    async def delete_activity(self, turn_context: TurnContext, reference: ConversationReference, cancellation_token):
+    async def delete_activity(self, turn_context: TurnContext, reference: ConversationReference):
         if turn_context is None:
             ValueError(type(turn_context))
 
@@ -133,4 +135,4 @@ class SlackAdapter:
         if turn_context.activity.timestamp is None:
             ValueError(type(turn_context.activity.timestamp))
 
-        await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime, cancellation_token)
+        await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime)
