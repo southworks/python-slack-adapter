@@ -10,6 +10,9 @@ from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
 from .slack_helper import SlackHelper
 
+from http.client import HTTPResponse
+from http import HTTPStatus
+from asyncio import StreamReader
 
 class SlackAdapter(BotAdapter):
 
@@ -136,3 +139,25 @@ class SlackAdapter(BotAdapter):
             ValueError(type(turn_context.activity.timestamp))
 
         await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime)
+
+    @staticmethod
+    async def process(self, request, response, bot):
+        if request is None:
+            ValueError(type(request))
+
+        if response is None:
+            ValueError(type(response))
+
+        if bot is None:
+            ValueError(type(bot))
+
+        sr = StreamReader(request.body)
+        body = sr.read()
+
+        slack_body = SlackHelper.deserialize_body(body)
+
+        if slack_body.type == "url_verification":
+            text = slack_body.challenge
+
+            await SlackHelper.write(response, HTTPStatus.OK, text, Encoding.UTF8,
+                                         cancellationToken).ConfigureAwait(false)
