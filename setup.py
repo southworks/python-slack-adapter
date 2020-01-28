@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name='slack_adapter',
-   version='1.0',
+   version='1.1',
    description='An adapter to interact with Slack & the Bot Framework',
    author='SOUTHWORKS',
    author_email='manx@southworks.com',
