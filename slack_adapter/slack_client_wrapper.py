@@ -437,7 +437,12 @@ class SlackClientWrapper:
         base_str = str.join(':', signature)
 
         # ToDo: look if the using structure in .NET is necessary here
-        # WIP
+        hmac = HMACSHA256(Encoding.UTF8.GetBytes(options.SlackClientSigningSecret))
+        hash_array = hmac.Compute_hash(Encoding.UTF8.GetBytes(base_str))
+        hash = str.Concat("v0=", BitConverter.ToString(hash_array).Replace("-", str.Empty)).ToUpperInvariant()
+        retrieved_signature = request.Headers["X-Slack-Signature"].ToStr().ToUpperInvariant()
+        return hash == retrieved_signature
+
 
     async def login_with_slack(self, cancellation_token):
         if not self.options.slack_bot_token:
