@@ -11,7 +11,6 @@ from slack_adapter.slack_client_wrapper import SlackClientWrapper
 from slack_adapter.slack_event import SlackEvent
 
 
-
 Object = lambda **kwargs: type("Object", (), kwargs)
 
 

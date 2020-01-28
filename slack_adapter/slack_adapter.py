@@ -159,5 +159,25 @@ class SlackAdapter(BotAdapter):
         if slack_body.type == "url_verification":
             text = slack_body.challenge
 
-            await SlackHelper.write(response, HTTPStatus.OK, text, Encoding.UTF8,
-                                         cancellationToken).ConfigureAwait(false)
+            await SlackHelper.write(response, HTTPStatus.OK, text, 'utf-8')
+            raise Exception(text)
+
+        if self._slack_client.options.slack_verification_token is not None and slack_body.token != self._slack_client.options.slack_verification_token:
+            text = 'Rejected due to mismatched verificationToken:{slackBody}'
+
+            await SlackHelper.write(response, HTTPStatus.FORBIDDEN, text, 'utf-8')
+
+            raise Exception(text)
+
+        activity = Activity
+
+        if slack_body.payload is not None:
+            # handle interactive_message callbacks and block_actions
+            activity = slack_helper.payload_to_activity(slack_body.payload)
+        elif slack_body.type == 'event_callback':
+            # this is an event api post
+            activity = await SlackHelper.event_to_activity(slack_body.event, self._slack_client)
+        elif slack_body.command is not None:
+            activity = await SlackHelper.CommandToActivityAsync(slack_body, self._slack_client)
+        else:
+            raise Exception(f'Unknown Slack event type {slack_body.type}')
