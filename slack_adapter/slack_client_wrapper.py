@@ -8,6 +8,9 @@ from slack_adapter import NewSlackMessage
 import slack
 import http.client
 from multipledispatch import dispatch
+import unicodedata
+import hmac
+import hashlib
 
 
 class SlackClientWrapper:
@@ -427,22 +430,20 @@ class SlackClientWrapper:
         user_id = await self.options.get_bot_user_by_team(str(activity.conversation["team"]), cancellation_token)
         return user_id if not user_id else Exception('Missing credentials for team.')
 
-    def verify_signature(self, request, body):
+    @staticmethod
+    def verify_signature(self, request, body, encoding: unicodedata):
         if not request or not body:
             return False
 
-        # ToDo: check HttpRequest library equivalent for the request variable
         time_stamp = request.Headers["X-Slack-Request-Timestamp"]
         signature = ['v0=', str(time_stamp), body]
         base_str = str.join(':', signature)
 
-        # ToDo: look if the using structure in .NET is necessary here
-        hmac = HMACSHA256(Encoding.UTF8.GetBytes(options.SlackClientSigningSecret))
-        hash_array = hmac.Compute_hash(Encoding.UTF8.GetBytes(base_str))
-        hash = str.Concat("v0=", BitConverter.ToString(hash_array).Replace("-", str.Empty)).ToUpperInvariant()
-        retrieved_signature = request.Headers["X-Slack-Signature"].ToStr().ToUpperInvariant()
+        hmac = hmac.new(encoding.UTF8.encode(self.options.SlackClientSigningSecret))
+        hash_array = hmac.Compute_hash(encoding.UTF8.encode.GetBytes(base_str))
+        hash = ("v0=" + BitConverter.str(hash_array).replace("-", '')).ToUpperInvariant()
+        retrieved_signature = request.Headers["X-Slack-Signature"].str().ToUpperInvariant()
         return hash == retrieved_signature
-
 
     async def login_with_slack(self, cancellation_token):
         if not self.options.slack_bot_token:
