@@ -1,7 +1,7 @@
 from logging import Logger
 from typing import List
 
-from botbuilder.core import TurnContext, BotAdapter
+from botbuilder.core import TurnContext, BotAdapter, Bot
 from botbuilder.schema import Activity, ConversationReference, ResourceResponse
 from botframework.connector.models import ActivityTypes, ConversationAccount
 
@@ -10,9 +10,10 @@ from .activity_resource_response import ActivityResourceResponse
 from .slack_client_wrapper import SlackClientWrapper
 from .slack_helper import SlackHelper
 
-from http.client import HTTPResponse
 from http import HTTPStatus
 from asyncio import StreamReader
+
+import unicodedata
 
 class SlackAdapter(BotAdapter):
 
@@ -141,7 +142,7 @@ class SlackAdapter(BotAdapter):
         await self._slack_client.delete_message(reference.channel_id, turn_context.activity.timestamp.datetime)
 
     @staticmethod
-    async def process(self, request, response, bot):
+    async def process(self, request, response, bot: Bot):
         if request is None:
             ValueError(type(request))
 
@@ -181,3 +182,14 @@ class SlackAdapter(BotAdapter):
             activity = await SlackHelper.CommandToActivityAsync(slack_body, self._slack_client)
         else:
             raise Exception(f'Unknown Slack event type {slack_body.type}')
+
+        context = TurnContext(self, activity)
+        context.turn_state.add("httpStatus", HTTPStatus.OK)
+
+        await BotAdapter.run_pipeline(context, bot.on_turn())
+
+        code = context.turn_state.get("httpStatus")
+        status_code = HTTPStatus(code)
+        text = context.turn_state.get("httpBody") if context.turn_state.get("httpBody") is not None else None
+
+        await slack_helper.write(response, status_code, text, unicodedata.encoding.encode('utf-8'))
