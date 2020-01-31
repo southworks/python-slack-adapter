@@ -9,8 +9,7 @@ import slack
 import http.client
 from multipledispatch import dispatch
 import unicodedata
-import hmac
-import hashlib
+from hmac import HMAC
 
 
 class SlackClientWrapper:
@@ -431,7 +430,7 @@ class SlackClientWrapper:
         return user_id if not user_id else Exception('Missing credentials for team.')
 
     @staticmethod
-    def verify_signature(self, request, body, encoding: unicodedata):
+    def verify_signature(self, request, body):
         if not request or not body:
             return False
 
@@ -439,8 +438,16 @@ class SlackClientWrapper:
         signature = ['v0=', str(time_stamp), body]
         base_str = str.join(':', signature)
 
-        hmac = hmac.new(encoding.UTF8.encode(self.options.SlackClientSigningSecret))
-        hash_array = hmac.Compute_hash(encoding.UTF8.encode.GetBytes(base_str))
+
+        # Todo: Research how to port Bit Converter
+        # Todo: How to initialite HMAC with "new"
+        # Todo: ToUpperInvariant
+        # Todo: Search if "replace" its valid
+
+        # Todo: ComputeHash see if digest work
+
+        hmac = HMAC.new(self.options.slack_client_secret.encode('UTF-8'))
+        hash_array = hmac.copy(base_str.encode('UTF-8'))
         hash = ("v0=" + BitConverter.str(hash_array).replace("-", '')).ToUpperInvariant()
         retrieved_signature = request.Headers["X-Slack-Signature"].str().ToUpperInvariant()
         return hash == retrieved_signature
