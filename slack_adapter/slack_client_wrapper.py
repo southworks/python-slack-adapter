@@ -443,8 +443,6 @@ class SlackClientWrapper:
         signature = ['v0=', str(time_stamp), body]
         base_str = str.join(':', signature)
 
-        # Todo: Research how to port Bit Converter
-
         first_hmac = hmac.new(self.options.slack_client_secret.encode('UTF-8'))
         hash_array = first_hmac.digest_size(base_str.encode('UTF-8'))
         new_hash = ("v0=" + bytearray(hash_array).hex()).upper()
