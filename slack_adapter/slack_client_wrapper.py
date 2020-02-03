@@ -9,7 +9,8 @@ import slack
 import http.client
 from multipledispatch import dispatch
 import unicodedata
-from hmac import HMAC
+import hmac
+import hashlib
 
 
 class SlackClientWrapper:
@@ -19,7 +20,7 @@ class SlackClientWrapper:
     @property
     def api(self):
         return self._api
-    
+
     @property
     def options(self) -> SlackAdapterOptions:
         """
@@ -78,8 +79,8 @@ class SlackClientWrapper:
             @returns: The SlackResponse representing the response to the reaction added.
         """
         # ToDo: look for this method's equivalent in slack client for Python
-        return await self._api.API_request_with_token(post_parameters).configure_await(False)\
-            if not post_parameters else\
+        return await self._api.API_request_with_token(post_parameters).configure_await(False) \
+            if not post_parameters else \
             await self._api.API_request_with_token().configure_await(False)
 
     async def channels_set_topic(self, channel_id, new_topic, cancellation_token):
@@ -290,7 +291,7 @@ class SlackClientWrapper:
         """
 
         """
-        return await self._api.groups_setTopic(channel=channel,topic=topic)
+        return await self._api.groups_setTopic(channel=channel, topic=topic)
 
     async def groups_unarchive(self, channel):
         """
@@ -319,7 +320,8 @@ class SlackClientWrapper:
         return await self._api.chat_postEphemeral(channel=channel, user=user)
 
     @dispatch(str, str, str, str, bool, )
-    async def post_message(self, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, blocks, attachments, unfurl_links: bool, icon_url, icon_emoji, as_user: bool, cancellation_token):
+    async def post_message(self, channel_id: str, text: str, bot_name: str, parse: str, link_names: bool, blocks,
+                           attachments, unfurl_links: bool, icon_url, icon_emoji, as_user: bool, cancellation_token):
         """
             Wraps Slack API's PostMessageAsync method.
             @param channel_id: The channel id.
@@ -337,7 +339,10 @@ class SlackClientWrapper:
             @rtype: SlackResponse
             @returns: The SlackResponse to the posting operation.
         """
-        return await self._api.chat_postMessage(channel=channel_id, text=text, bot_name=bot_name, parse=parse, link_names=link_names, blocks=blocks, attachments=attachments, unfurl_links=unfurl_links, icon_url=icon_url, icon_emoji=icon_emoji, as_user=as_user, cancellation_token=cancellation_token)
+        return await self._api.chat_postMessage(channel=channel_id, text=text, bot_name=bot_name, parse=parse,
+                                                link_names=link_names, blocks=blocks, attachments=attachments,
+                                                unfurl_links=unfurl_links, icon_url=icon_url, icon_emoji=icon_emoji,
+                                                as_user=as_user, cancellation_token=cancellation_token)
 
     @dispatch(object, str)
     async def post_message(self, message: NewSlackMessage, cancellation_token: str):
@@ -438,26 +443,20 @@ class SlackClientWrapper:
         signature = ['v0=', str(time_stamp), body]
         base_str = str.join(':', signature)
 
-
         # Todo: Research how to port Bit Converter
-        # Todo: How to initialite HMAC with "new"
-        # Todo: ToUpperInvariant
-        # Todo: Search if "replace" its valid
 
-        # Todo: ComputeHash see if digest work
-
-        hmac = HMAC.new(self.options.slack_client_secret.encode('UTF-8'))
-        hash_array = hmac.copy(base_str.encode('UTF-8'))
-        hash = ("v0=" + BitConverter.str(hash_array).replace("-", '')).ToUpperInvariant()
-        retrieved_signature = request.Headers["X-Slack-Signature"].str().ToUpperInvariant()
-        return hash == retrieved_signature
+        first_hmac = hmac.new(self.options.slack_client_secret.encode('UTF-8'))
+        hash_array = first_hmac.digest_size(base_str.encode('UTF-8'))
+        new_hash = ("v0=" + BitConverter.str(hash_array).replace("-", '')).upper()
+        retrieved_signature = request.Headers["X-Slack-Signature"].str().upper()
+        return new_hash == retrieved_signature
 
     async def login_with_slack(self, cancellation_token):
         if not self.options.slack_bot_token:
             identity = await self.test_auth(cancellation_token)
-        elif not self.options.slack_client_id or not\
-                self.options.slack_client_secret or not\
-                self.options.slack_redirect_uri or\
+        elif not self.options.slack_client_id or not \
+                self.options.slack_client_secret or not \
+                self.options.slack_redirect_uri or \
                 len(self.options.slack_scopes) == 0:
             raise Exception('Missing Slack API credentials! Provide SlackClientId, SlackClientSecret, scopes and'
                             ' SlackRedirectUri as part of the SlackAdapter options.')
