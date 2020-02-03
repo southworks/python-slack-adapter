@@ -447,7 +447,7 @@ class SlackClientWrapper:
 
         first_hmac = hmac.new(self.options.slack_client_secret.encode('UTF-8'))
         hash_array = first_hmac.digest_size(base_str.encode('UTF-8'))
-        new_hash = ("v0=" + BitConverter.str(hash_array).replace("-", '')).upper()
+        new_hash = ("v0=" + bytearray(hash_array).hex()).upper()
         retrieved_signature = request.Headers["X-Slack-Signature"].str().upper()
         return new_hash == retrieved_signature
 
